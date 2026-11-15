@@ -1,0 +1,12 @@
+<?php
+require __DIR__.'/bootstrap.php'; define('ABSPATH',__DIR__.'/');define('PSMH_VERSION','0.3.0');define('LOGGED_IN_KEY','test-key');define('NONCE_KEY','test-nonce');
+require dirname(__DIR__).'/includes/class-multihoster-meta.php';require dirname(__DIR__).'/includes/interface-hoster-adapter.php';require dirname(__DIR__).'/includes/class-credentials.php';require dirname(__DIR__).'/includes/adapters/class-peestream-adapter.php';
+function api_check($ok,$m){if(!$ok){fwrite(STDERR,"FAIL: $m\n");exit(1);}echo "PASS: $m\n";}
+$GLOBALS['psmh_options']['psmh_peestream_instance_url']='https://peestream.example';$GLOBALS['psmh_api_queue']=array(array(200,array('status'=>200,'result'=>array('filecode'=>'abc123','via'=>'host'))),array(200,array(array('file_code'=>'abc123','status'=>200,'state'=>'ready','canplay'=>1,'embed'=>'https://peestream.example/e/abc123','link'=>'https://peestream.example/v/abc123'))));
+$adapter=new PSMH_PeeStream_Adapter();$r=$adapter->submit_remote_url('https://source.example/video','secret-test',0,'A title');api_check(!empty($r['ok'])&&$r['file_code']==='abc123','remote URL ingest parses result filecode');api_check(strpos($GLOBALS['psmh_last_api_url'],'key=secret-test')!==false,'API key sent only as documented query parameter');api_check(strpos($GLOBALS['psmh_last_api_url'],'url=https%3A')!==false,'source URL is query encoded');
+$r=$adapter->file_info('abc123','secret-test');api_check($r['ok']&&$r['state']==='ready'&&strpos($r['embed'],'https://')===0,'file info recognizes ready state and HTTPS embed');
+$GLOBALS['psmh_api_queue']=array(array(200,array('status'=>200,'files'=>array())));$v=$adapter->validate_credentials('key-valid');api_check(!empty($v['ok']),'credential validation accepts successful file-list response');
+$GLOBALS['psmh_api_queue']=array(array(200,array('status'=>403,'msg'=>'denied')));$v=$adapter->validate_credentials('key-invalid');api_check(empty($v['ok'])&&$v['code']==='invalid_credentials','credential validation rejects API 403');
+$before=$GLOBALS['psmh_last_api_url'];$bad=$adapter->submit_remote_url('http://127.0.0.1/private','secret-test');api_check(empty($bad['ok'])&&$GLOBALS['psmh_last_api_url']===$before,'private/local source URL rejected before API request');
+$GLOBALS['psmh_api_queue']=array(array(403,array('status'=>403,'msg'=>'denied')));$r=$adapter->submit_remote_url('https://source.example/video','secret-test');api_check(empty($r['ok'])&&$r['code']==='remote_ingest_rejected','API rejection is a structured failure');
+echo "Adapter contract tests passed.\n";

@@ -1,0 +1,19 @@
+<?php
+if (!defined('ABSPATH')) { exit; }
+final class PSMH_PeeStream_Adapter implements PSMH_Hoster_Adapter {
+    public function get_id(){return 'peestream';}
+    public static function instance_url(){ $url=get_option('psmh_peestream_instance_url','');$url=esc_url_raw(trim((string)$url),array('https'));return $url && strpos($url,'https://')===0 ? untrailingslashit($url) : ''; }
+    private function request($path,$params){$base=self::instance_url();if(!$base){return array('ok'=>false,'code'=>'instance_not_configured','retryable'=>false);} $url=add_query_arg($params,$base.$path);$r=wp_safe_remote_get($url,array('timeout'=>15,'redirection'=>0,'limit_response_size'=>65536,'headers'=>array('Accept'=>'application/json')));if(is_wp_error($r)){return array('ok'=>false,'code'=>'network_error','retryable'=>true);} $status=(int)wp_remote_retrieve_response_code($r);$body=json_decode(wp_remote_retrieve_body($r),true);if(!is_array($body)){return array('ok'=>false,'code'=>'invalid_json','http_status'=>$status,'retryable'=>$status>=500);}return array('ok'=>true,'http_status'=>$status,'body'=>$body);}
+    public function validate_credentials($credentials){if(!is_string($credentials)||trim($credentials)===''){return array('ok'=>false,'code'=>'missing_credentials');}$r=$this->request('/api/file/list',array('key'=>$credentials,'per_page'=>1));if(empty($r['ok']))return $r;$b=$r['body'];if(isset($b['status'])&&in_array((int)$b['status'],array(401,403),true))return array('ok'=>false,'code'=>'invalid_credentials');return array('ok'=>true,'code'=>'credential_accepted');}
+    public function check($url){return PSMH_Health::probe($url);}
+    public function fetch($url,$destination,$max_bytes){return array('ok'=>false,'code'=>'fetch_not_supported_in_remote-ingest-adapter','retryable'=>false);}
+    public function upload($file_path,$credentials,$title=''){return array('ok'=>false,'code'=>'direct-file-upload-contract-unconfirmed','retryable'=>false);}
+    public function submit_remote_url($url,$credentials,$folder_id=0,$title=''){
+        $url=esc_url_raw($url,array('http','https'));if(!$url||!wp_http_validate_url($url)||!is_string($credentials)||$credentials==='')return array('ok'=>false,'code'=>'invalid_input','retryable'=>false);
+        $params=array('key'=>$credentials,'url'=>$url);if((int)$folder_id>0)$params['fld_id']=(int)$folder_id;if($title!=='')$params['new_title']=sanitize_text_field($title);
+        $r=$this->request('/api/upload/url',$params);if(empty($r['ok']))return $r;$body=$r['body'];$status=isset($body['status'])?(int)$body['status']:(int)$r['http_status'];$file='';if(isset($body['result']['filecode']))$file=(string)$body['result']['filecode'];elseif(isset($body['filecode']))$file=(string)$body['filecode'];
+        if($status<200||$status>=300||$file==='')return array('ok'=>false,'code'=>'remote_ingest_rejected','http_status'=>$status,'retryable'=>$status>=500);
+        return array('ok'=>true,'file_code'=>sanitize_text_field($file),'via'=>isset($body['result']['via'])?sanitize_key($body['result']['via']):'');
+    }
+    public function file_info($filecode,$credentials){if(!$filecode||!$credentials)return array('ok'=>false,'code'=>'invalid_input','terminal'=>true);$r=$this->request('/api/file/info',array('key'=>$credentials,'file_code'=>$filecode));if(empty($r['ok']))return $r;$body=$r['body'];$row=isset($body[0])&&is_array($body[0])?$body[0]:$body;$state=isset($row['state'])?sanitize_key($row['state']):'';if(!in_array($state,array('pending','processing','ready','failed'),true))return array('ok'=>false,'code'=>'unknown_state','retryable'=>true);return array('ok'=>true,'state'=>$state,'embed'=>isset($row['embed'])?esc_url_raw($row['embed'],array('https')):'','link'=>isset($row['link'])?esc_url_raw($row['link'],array('https')):'','error'=>isset($row['error'])?sanitize_text_field($row['error']):'');}
+}

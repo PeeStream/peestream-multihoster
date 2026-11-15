@@ -1,6 +1,6 @@
 # PeeStream Multi-Hoster (MVP)
 
-Version 0.3.3 - Phase 1, Phase 2 status engine and Phase 3 adapter/queue foundation. A WordPress plugin for manually storing multiple video sources per public post and rendering a source selector/player.
+Version 0.3.4 - Phase 1, Phase 2 status engine and Phase 3 adapter/queue foundation. A WordPress plugin for manually storing multiple video sources per public post and rendering a source selector/player.
 
 ## Included
 - Per-post `_psmh_sources` metadata: `hoster`, `url`, `label`, `order`, `status` (`alive`, `dead`, `checking`).
@@ -51,3 +51,9 @@ Run `php tests/test-plugin.php` (requires PHP CLI). This is a lightweight unit h
 
 ### Queue operations UI
 The **Settings → PeeStream Host Accounts** page shows `pending` (queued + retry), `processing` (active lease), `polling`, `failed`, and `healed` (complete) totals. **Run healing worker now** schedules a one-off WP-Cron invocation protected by `manage_options` and a nonce; it does not run long network work in the admin request. This explicit manual run can process queued work even while recurring healing is disabled.
+
+## License & Support
+- **License:** GNU General Public License v2 (GPLv2) - see `LICENSE`.
+- **Security policy:** see `SECURITY.md`. Report vulnerabilities privately; never post credentials, keys or nonces in a public Issue.
+- **Release integrity:** `SHA256SUMS` lists the SHA-256 of the release asset `peestream-multihoster.zip`. Download the asset, put `SHA256SUMS` beside it and run `sha256sum -c SHA256SUMS`. Rebuild locally with `scripts/build-release.sh` (byte-reproducible).
+- **Official support:** `https://peestream.com` or the WJunction support thread.

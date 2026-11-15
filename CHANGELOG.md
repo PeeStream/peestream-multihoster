@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4 - Repository hygiene and reproducible release
+- Added GPLv2 `LICENSE`, `SECURITY.md`, `CONTRIBUTING.md` and `SHA256SUMS` to the repository, matching the other PeeStream client packages.
+- Added `scripts/build-release.sh`: fixed timestamps, allowlisted file list and explicit compression, so `dist/peestream-multihoster.zip` is byte-reproducible. The package now ships `LICENSE` next to the plugin files.
+- Version bumped to 0.3.4. No functional, schema or API changes; the plugin remains a non-webhook (no `X-PeeStream-Signature`) component.
+
 ## 0.3.3 - Documentation scope clarification
 - Clarified that the multi-hoster plugin is not an AutoPublish V2 webhook receiver.
 - Documented that `X-PeeStream-Signature`, HMAC-SHA256 webhook secrets and `?secret=` webhook URLs do not apply to this plugin's optional PeeStream adapter API calls.

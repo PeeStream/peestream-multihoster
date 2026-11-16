@@ -52,6 +52,16 @@ Run `php tests/test-plugin.php` (requires PHP CLI). This is a lightweight unit h
 ### Queue operations UI
 The **Settings → PeeStream Host Accounts** page shows `pending` (queued + retry), `processing` (active lease), `polling`, `failed`, and `healed` (complete) totals. **Run healing worker now** schedules a one-off WP-Cron invocation protected by `manage_options` and a nonce; it does not run long network work in the admin request. This explicit manual run can process queued work even while recurring healing is disabled.
 
+---
+
+## Pricing & Early Adopter Promo
+
+- **Multi-Source Player & Selector:** **100% Free Forever.** Managing multiple video sources per post and rendering responsive player tabs with `[peestream_sources]` requires no PeeStream account, no license keys, and zero fees.
+- **Automated Dead-Link Healing (Early Adopter Promo):** The automated background healing engine (which health-checks external sources and automatically remote-ingests alive mirrors to PeeStream when primary sources fail) is currently **100% free and fully unlocked** for all beta testers with a free PeeStream API key.
+- **Future Roadmap:** To sustainably cover remote transcode server infrastructure and continuous hoster resolver maintenance, high-volume automated background healing may later be accompanied by an optional, low-cost **VIP Webmaster Addon** (starting at ~$1/month), while standard multi-source playback remains permanently free.
+
+---
+
 ## License & Support
 - **License:** GNU General Public License v2 (GPLv2) - see `LICENSE`.
 - **Security policy:** see `SECURITY.md`. Report vulnerabilities privately; never post credentials, keys or nonces in a public Issue.

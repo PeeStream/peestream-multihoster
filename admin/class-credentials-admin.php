@@ -15,6 +15,11 @@ final class PSMH_Credentials_Admin {
     public static function render() {
         if (!current_user_can('manage_options')) { return; }
         echo '<div class="wrap"><h1>' . esc_html__('Host API credentials','peestream-multihoster') . '</h1>';
+        echo '<div class="notice notice-info" style="margin:15px 0;padding:12px 15px;border-left:4px solid #10b981;">';
+        echo '<h3 style="margin-top:0;margin-bottom:6px;color:#065f46;">' . esc_html__('Early Adopter Promo & Transparency','peestream-multihoster') . '</h3>';
+        echo '<p style="margin:0 0 6px 0;"><strong>' . esc_html__('Multi-Hoster Player Tabs:','peestream-multihoster') . '</strong> ' . esc_html__('100% Free Forever. No PeeStream account or API credentials required to display and switch multiple hoster sources.','peestream-multihoster') . '</p>';
+        echo '<p style="margin:0;"><strong>' . esc_html__('Automated Dead-Link Healing:','peestream-multihoster') . '</strong> ' . esc_html__('Currently 100% unlocked for free under our Early Adopter Promo. Uses your PeeStream API key to automatically re-ingest alternate sources when primary links die. High-volume background healing may later be supported via an optional VIP webmaster addon (from $1/mo).','peestream-multihoster') . '</p>';
+        echo '</div>';
         echo '<p>' . esc_html__('Secrets are encrypted in the database. Saved values are never displayed. Configure unique LOGGED_IN_KEY and NONCE_KEY constants first.','peestream-multihoster') . '</p>';
         $counts=PSMH_Healing_Queue::status_counts();
         echo '<h2>' . esc_html__('Healing queue','peestream-multihoster') . '</h2><table class="widefat striped"><thead><tr><th>Pending</th><th>Processing</th><th>Polling</th><th>Failed</th><th>Healed</th></tr></thead><tbody><tr>';
